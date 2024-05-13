@@ -38,18 +38,37 @@ function activate(context) {
     });
 
     Object.keys(groupedFiles).sort().forEach(dirName => {
-      markdownContent += `### ${dirName}\n\n`;
+      markdownContent += `- ${dirName}\n`;
+      const dirPathParts = dirName.split(path.sep);
+      let indentLevel = dirPathParts.length - 1;
       groupedFiles[dirName].sort().forEach(filePath => {
-        markdownContent += `- [${filePath}](${filePath})\n`;
+        const filePathParts = filePath.split(path.sep);
+        const indent = '  '.repeat(indentLevel);
+        markdownContent += `${indent}- ${filePathParts[filePathParts.length - 1]}\n`;
       });
       markdownContent += '\n';
     });
 
-    // Create a new markdown file and write the content
-    const newFilePath = vscode.Uri.joinPath(workspaceFolders[0].uri, 'workspace_structure.md');
-    await vscode.workspace.fs.writeFile(newFilePath, Buffer.from(markdownContent));
+    // Prompt the user to choose between markdown and plain text
+    const fileType = await vscode.window.showQuickPick(['Markdown', 'Plain Text'], { placeHolder: 'Choose file type' });
 
-    // Open the newly created markdown file
+    if (!fileType) {
+      return; // User canceled the selection
+    }
+
+    let newFilePath;
+    let fileContent = markdownContent;
+
+    if (fileType === 'Markdown') {
+      newFilePath = vscode.Uri.joinPath(workspaceFolders[0].uri, 'workspace_structure.md');
+    } else {
+      newFilePath = vscode.Uri.joinPath(workspaceFolders[0].uri, 'workspace_structure.txt');
+      fileContent = fileContent.replace(/#/g, '').replace(/```/g, '').replace(/\n\n/g, '\n\n');
+    }
+
+    await vscode.workspace.fs.writeFile(newFilePath, Buffer.from(fileContent));
+
+    // Open the newly created file
     vscode.window.showTextDocument(newFilePath);
   });
 
