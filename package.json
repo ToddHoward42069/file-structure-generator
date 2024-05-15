@@ -4,7 +4,8 @@
   "publisher": "Hedgehog420",
   "repository": "https://github.com/ToddHoward42069/markdown-workspace-structure-generator.git",
   "description": "This VSCode extension generates a Markdown Workspace structure from the current workspace.",
-  "version": "0.0.6",
+  "icon": "images/logo.png",
+  "version": "0.0.7",
   "engines": {
     "vscode": "^1.88.0"
   },
